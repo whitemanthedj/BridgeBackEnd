@@ -20,6 +20,9 @@ namespace BridgeBid
         /// </summary>
         int maxBidPlayerIndex;
 
+        bool doubled;
+        bool redoubled;
+
         /// <summary>
         /// running record of all the bids in the Auction
         /// </summary>
@@ -78,6 +81,8 @@ namespace BridgeBid
                 return false;
             }
 
+            this.doubled = false;
+            this.redoubled = false;
 
             this.consecutivePasses = (newBid.Pass()? this.consecutivePasses + 1 : 0);
             //Console.WriteLine(this.consecutivePasses);
@@ -121,6 +126,34 @@ namespace BridgeBid
         private bool MaxBidPartners(int playerIndex)
         {
             return this.maxBidPlayerIndex % (this.allBids.Length/2) == playerIndex % (this.allBids.Length/2);
+        }
+
+
+        public void Double()
+        {
+            this.HandleDouble(this.doubled);
+        }
+
+        public void ReDouble()
+        {
+            this.HandleDouble(this.redoubled);
+        }
+
+        private void HandleDouble(bool truth)
+        {
+            truth = true;
+            this.consecutivePasses = 0;
+            //return truth;
+        }
+
+        public bool isDoubled() 
+        {
+            return this.doubled;
+        }
+
+        public bool isReDoubled()
+        {
+            return this.redoubled;
         }
 
         /// <summary>

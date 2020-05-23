@@ -188,8 +188,13 @@ namespace BridgePlayer
             Print(this.FullHand());
             Console.WriteLine("\ntype the index of the card you would like to play (remember indices start at 0, please no negatives):");
             int index;
+            string i;
 
-            while (( index = Convert.ToInt32(Console.ReadLine().Trim()) ) >= hand.Count)
+
+            //index = ( (i = Console.ReadLine().Trim()).Length > 0 ? Convert.ToInt32(i) : 0);
+
+            //while (( index = Convert.ToInt32(Console.ReadLine().Trim()) ) >= hand.Count)
+            while (( index = ( (i = Console.ReadLine().Trim()).Length > 0 ? Convert.ToInt32(i) : 0) ) >= hand.Count )
             {
                 Console.WriteLine("ERROR: type the index of the card you would like to play (remember indices start at 0, please no negatives):");
             }
@@ -264,6 +269,35 @@ namespace BridgePlayer
         {
             this.PrintHand();
             
+            string thisBid = "";
+            Console.WriteLine("What is your bid?");
+            thisBid += Console.ReadLine().Trim();
+
+            if(thisBid.Length > 0)
+            {
+                
+                switch(thisBid.Substring(0,1))
+                {
+                    case "1":
+                    case "2":
+                    case "3":
+                    case "4":
+                    case "5":
+                    case "6":
+                    case "7":
+                        this.playerBid = new Bid(false, Convert.ToInt32(thisBid.Substring(0,1)), thisBid.Substring(1).Trim());
+                        return this.playerBid;
+                        //break;
+                    default:
+                        // pass
+                        break;
+                }
+            }
+            
+            this.playerBid = new Bid();
+            return this.playerBid;
+
+            /** /
             Console.WriteLine("Would you like to PASS? (Y/N)");
             string passing = Console.ReadLine();
 
@@ -293,6 +327,7 @@ namespace BridgePlayer
             this.playerBid = new Bid(false, bidVal, suit);
             Console.WriteLine(this.playerBid.ToString());
             return this.playerBid;
+            /**/
         }
     
 

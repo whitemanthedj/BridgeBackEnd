@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/home/andrew/Documents/Bridge/Bridge.csproj": {}
+    "/home/andrew/Documents/BridgeBackEnd/Bridge.csproj": {}
   },
   "projects": {
-    "/home/andrew/Documents/Bridge/Bridge.csproj": {
+    "/home/andrew/Documents/BridgeBackEnd/Bridge.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/andrew/Documents/Bridge/Bridge.csproj",
+        "projectUniqueName": "/home/andrew/Documents/BridgeBackEnd/Bridge.csproj",
         "projectName": "Bridge",
-        "projectPath": "/home/andrew/Documents/Bridge/Bridge.csproj",
+        "projectPath": "/home/andrew/Documents/BridgeBackEnd/Bridge.csproj",
         "packagesPath": "/home/andrew/.nuget/packages/",
-        "outputPath": "/home/andrew/Documents/Bridge/obj/",
+        "outputPath": "/home/andrew/Documents/BridgeBackEnd/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/andrew/.nuget/NuGet/NuGet.Config"

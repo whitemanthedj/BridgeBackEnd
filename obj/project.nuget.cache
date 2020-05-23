@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "aZH5KJYGcagWrGFKXqSppF38ly98+EoIQNm6crWqWdn2hrrTdGRfu2kC5wGTKcMkDp9Cmh8hSxiwcQQZ8REHsA==",
+  "dgSpecHash": "DF0FW9PLELEV3rVfRhs2YDkSKDsJbAt2WYnJ1epiJNLoyt5eJogbbbu9VWqcvQ4giSsdv68kZl5y2j7AKQuCpg==",
   "success": true,
-  "projectFilePath": "/home/andrew/Documents/Bridge/Bridge.csproj",
+  "projectFilePath": "/home/andrew/Documents/BridgeBackEnd/Bridge.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }

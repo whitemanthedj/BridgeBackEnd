@@ -41,7 +41,7 @@ namespace BridgeScoring
                         we.addScore(netTricks, finalContract.TricksNeeded() - book, finalContract);
                     } else {
                         // we went down tricks
-                        they.addScore(netTricks, we.Vulnerable());
+                        they.addScore(Math.Abs(netTricks), we.Vulnerable());
                     }
                 } else {
                     // they made their bid
@@ -50,7 +50,7 @@ namespace BridgeScoring
                         they.addScore(netTricks, finalContract.TricksNeeded() - book, finalContract);
                     } else {
                         // they went down tricks
-                        we.addScore(netTricks, we.Vulnerable());
+                        we.addScore(Math.Abs(netTricks), we.Vulnerable());
                     }
                 }
             }
