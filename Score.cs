@@ -52,7 +52,7 @@ namespace BridgeScoring
                 bidders.addScore(netTricks, finalContract.TricksNeeded() - book, finalContract, bidders.Vulnerable());
             } else {
                 // bidders went down tricks
-                opponent.addScore(Math.Abs(netTricks), bidders.Vulnerable());
+                opponent.addScore(Math.Abs(netTricks), bidders.Vulnerable(), finalContract);
             }
             if(bidders.GotGame())
             {
