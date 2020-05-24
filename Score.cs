@@ -32,29 +32,35 @@ namespace BridgeScoring
         {
             if(finalContract.Suit() != biddableSuits.PASS)
             {
+                Console.WriteLine("The bidders got " + tricksTaken + " tricks and needed " + finalContract.TricksNeeded());
                 int netTricks = tricksTaken - finalContract.TricksNeeded();
                 if(this.we.Contains(person))
                 {
-                    // we made their bid
-                    if(netTricks >= 0)
-                    {
-                        we.addScore(netTricks, finalContract.TricksNeeded() - book, finalContract);
-                    } else {
-                        // we went down tricks
-                        they.addScore(Math.Abs(netTricks), we.Vulnerable());
-                    }
+                    // we made the bid
+                    HandleScores(we, they, finalContract, netTricks);
                 } else {
-                    // they made their bid
-                    if(netTricks >= 0)
-                    {
-                        they.addScore(netTricks, finalContract.TricksNeeded() - book, finalContract);
-                    } else {
-                        // they went down tricks
-                        we.addScore(Math.Abs(netTricks), we.Vulnerable());
-                    }
+                    // they made the bid
+                    HandleScores(they, we, finalContract, netTricks);
                 }
             }
 
+        }
+
+        private static void HandleScores(PartnerScore bidders, PartnerScore opponent, Bid finalContract, int netTricks)
+        {
+            if(ContractWasMade(netTricks))
+            {
+                // bidders got enough triks
+                bidders.addScore(netTricks, finalContract.TricksNeeded() - book, finalContract, bidders.Vulnerable());
+            } else {
+                // bidders went down tricks
+                opponent.addScore(Math.Abs(netTricks), bidders.Vulnerable());
+            }
+        }
+
+        public static bool ContractWasMade(int netTricks)
+        {
+            return netTricks >= 0;
         }
 
 
@@ -88,6 +94,8 @@ namespace BridgeScoring
             this.belowLine = new List<int>();
             this.below = 0;
 
+            this.nummaOfGames = 0;
+
         }
 
         public bool GotGame()
@@ -102,16 +110,13 @@ namespace BridgeScoring
             this.belowLine = new List<int>();
         }
 
-        public void addScore(int tricksAbove, int tricksBelow, Bid bid)
-        {
-            this.addScore(tricksAbove, tricksBelow, bid, false, false);
-        }
-
-        public void addScore(int tricksAbove, int tricksBelow, Bid bid, bool doubled, bool redoubled)
+        public void addScore(int tricksAbove, int tricksBelow, Bid finalBid, bool biddersVulnerable)
         {
             int aPoints = 0, bPoints = 0;
 
-            switch(bid.Suit())
+            aPoints += IsSlam(tricksAbove+tricksBelow, biddersVulnerable);
+
+            switch(finalBid.Suit())
             {
                 // NT
                 case biddableSuits.NT:
@@ -129,6 +134,8 @@ namespace BridgeScoring
                     break;
             }
 
+            bPoints *= (finalBid.IsReDoubled() ? 4 : (finalBid.IsDoubled() ? 2 : 1));
+
             this.aboveLine.Add(aPoints);
             this.below += bPoints;
             this.belowLine.Add(bPoints);
@@ -137,25 +144,32 @@ namespace BridgeScoring
             player2.UpdateScore(aPoints+bPoints);
         }
 
-        public void addScore(int tricksWentDown, bool isOppenentVulnerable)
+        private int IsSlam(int totalTricks, bool vulnerable)
         {
-            this.addScore(tricksWentDown, isOppenentVulnerable, false, false);
-
-            
+            int SLAM = 6, GRANDSLAM = 7;
+            if(totalTricks >= GRANDSLAM)
+            {
+                // GRAND SLAM
+                return (vulnerable ? 1500 : 750);
+            } else if(totalTricks == SLAM) {
+                // SLAM
+                return (vulnerable ? 1000 : 500);
+            }
+            return 0;
         }
 
-        public void addScore(int tricksWentDown, bool isOppenentVulnerable, bool doubled, bool redoubled)
+
+
+        public void addScore(int tricksWentDown, bool isOppenentVulnerable)
         {
-            int points = (isOppenentVulnerable ? 50 : 100) * tricksWentDown ;
+            int points = (isOppenentVulnerable ? 100 : 50) * tricksWentDown ;
             
             this.aboveLine.Add( points );
 
-
             player1.UpdateScore(points);
             player2.UpdateScore(points);
-
-            
         }
+
 
         public bool Vulnerable()
         {

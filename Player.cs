@@ -288,6 +288,10 @@ namespace BridgePlayer
                         this.playerBid = new Bid(false, Convert.ToInt32(thisBid.Substring(0,1)), thisBid.Substring(1).Trim());
                         return this.playerBid;
                         //break;
+                    case "D":
+                    case "d":
+                        this.playerBid = new Bid(false, Convert.ToInt32(thisBid.Substring(0,1)), thisBid.Substring(1).Trim());
+                        return this.playerBid;
                     default:
                         // pass
                         break;

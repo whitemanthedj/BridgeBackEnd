@@ -203,7 +203,7 @@ namespace BridgeRound
                 int player = playerIndex % this.players.Length;
                 Console.WriteLine("Player "+ (player+1) +":");
                 
-                while(!this.auction.UpdateBid(player, this.players[player].MakeBid()))
+                while(!this.auction.UpdateBid( player, this.MakeBid(this.players[player]) ))
                 {
                     Console.WriteLine("ERROR: Incorrect bid entered, please try again");
                     Console.WriteLine("Player "+ (player+1) +":");
@@ -211,6 +211,44 @@ namespace BridgeRound
                 }
                 playerIndex++;
             }
+        }
+
+        private Bid MakeBid(Player cardShark)
+        {
+            cardShark.PrintHand();
+            
+            string thisBid = "";
+            Console.WriteLine("What is your bid?");
+            thisBid += Console.ReadLine().Trim();
+
+            if(thisBid.Length > 0)
+            {
+                
+                switch(thisBid.Substring(0,1))
+                {
+                    case "1":
+                    case "2":
+                    case "3":
+                    case "4":
+                    case "5":
+                    case "6":
+                    case "7":
+                        return new Bid(false, Convert.ToInt32(thisBid.Substring(0,1)), thisBid.Substring(1).Trim());
+                        //break;
+                    case "D":
+                    case "d":
+                        //this.auction.Double();
+                        return new DoubleBid(false);
+                    case "R":
+                    case "r":
+                        //this.auction.ReDouble();
+                        return new DoubleBid(true);
+                    default:
+                        // pass
+                        break;
+                }
+            }
+            return new Bid();
         }
 
         

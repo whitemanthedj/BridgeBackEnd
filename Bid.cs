@@ -5,7 +5,7 @@ using BridgePlayer;
 
 namespace BridgeBid
 {
-    public enum biddableSuits { PASS, C, D, H, S, NT}
+    public enum biddableSuits { PASS, C, D, H, S, NT, DOUBLE, REDOUBLE}
 
     public class Auction
     {
@@ -20,13 +20,13 @@ namespace BridgeBid
         /// </summary>
         int maxBidPlayerIndex;
 
-        bool doubled;
-        bool redoubled;
+        private delegate void doubling();
 
         /// <summary>
         /// running record of all the bids in the Auction
         /// </summary>
         List<Bid> record;
+        //List<string> fullRecord;
 
         /// <summary>
         /// used to determine when the Auction ends
@@ -42,6 +42,7 @@ namespace BridgeBid
             }
             this.maxBid = new Bid(true,0,"");
             this.record = new List<Bid>();
+            //this.fullRecord = new List<string>();
         }
 
         /// <summary>
@@ -75,14 +76,18 @@ namespace BridgeBid
         /// <returns> returns if the bid was a valid bid</returns>
         public bool UpdateBid(int playerIndex, Bid newBid)
         {
+            if(newBid.Suit() == biddableSuits.REDOUBLE)
+            {
+                this.HandleDouble(this.FinalContract().ReDouble);
+            } else if(newBid.Suit() == biddableSuits.DOUBLE) {
+                this.HandleDouble(this.FinalContract().Double);
+            }
+            
             // if the bid is NOT a pass and if the new bid is not valid return false
             if(newBid.GetBid() != (int) biddableSuits.PASS && (this.allBids[playerIndex].GreaterThan(newBid) || !newBid.GreaterThan(this.maxBid)))
             {
                 return false;
             }
-
-            this.doubled = false;
-            this.redoubled = false;
 
             this.consecutivePasses = (newBid.Pass()? this.consecutivePasses + 1 : 0);
             //Console.WriteLine(this.consecutivePasses);
@@ -91,6 +96,7 @@ namespace BridgeBid
             // update max
             this.UpdateMaxBid(playerIndex, newBid);
             this.record.Add(newBid);
+            //this.fullRecord.Add(newBid.ToString());
             return true;
         }
 
@@ -114,7 +120,7 @@ namespace BridgeBid
         {
             for(int i = 0; i < this.record.Count; i++)
             {
-                if(this.record[i].Suit() == this.maxBid.Suit() && this.MaxBidPartners(i))
+                if(this.record[i].Suit() == this.maxBid.Suit() && this.Bidder(i))
                 {
                     return i % this.allBids.Length;
                 }
@@ -123,37 +129,31 @@ namespace BridgeBid
             return this.maxBidPlayerIndex;
         }
 
-        private bool MaxBidPartners(int playerIndex)
+        private bool Bidder(int playerIndex)
         {
             return this.maxBidPlayerIndex % (this.allBids.Length/2) == playerIndex % (this.allBids.Length/2);
         }
 
 
-        public void Double()
-        {
-            this.HandleDouble(this.doubled);
-        }
 
-        public void ReDouble()
+        private void HandleDouble(doubling preformDouble)
         {
-            this.HandleDouble(this.redoubled);
-        }
-
-        private void HandleDouble(bool truth)
-        {
-            truth = true;
+            preformDouble();
             this.consecutivePasses = 0;
+            string doubleString = (this.FinalContract().IsReDoubled()  ? "REDOUBLE" : "DOUBLE");
+            //this.fullRecord.Add(doubleString);
+            Console.WriteLine(this.FinalContract() + " was " + doubleString +"D");
             //return truth;
         }
 
-        public bool isDoubled() 
+        public bool ContractDoubled() 
         {
-            return this.doubled;
+            return this.FinalContract().IsDoubled();
         }
 
-        public bool isReDoubled()
+        public bool ContractReDoubled()
         {
-            return this.redoubled;
+            return this.FinalContract().IsReDoubled();
         }
 
         /// <summary>
@@ -182,11 +182,20 @@ namespace BridgeBid
         {
             int player = 0;
             Console.WriteLine("------");
-            foreach(Bid currentBid in this.record)
+            
+            
+            /** /
+            foreach(string currentBid in this.fullRecord)
             {
                 Console.WriteLine("Player " + ((player % this.allBids.Length) + 1) + ": " + currentBid.ToString());
                 player++;
             }
+            /**/
+            foreach(Bid currentBid in this.record)
+            {
+                Console.WriteLine("Player " + ((player % this.allBids.Length) + 1) + ": " + currentBid.ToString());
+                player++;
+            } /**/
             Console.WriteLine("------");
         }
 
@@ -195,12 +204,15 @@ namespace BridgeBid
     public class Bid
     {
         
-        bool passed;
-        int bidValue;
+        protected bool passed;
+        protected int bidValue;
 
-        const int book = 6;
+        protected bool doubled;
+        protected bool redoubled;
+
+        protected const int book = 6;
        
-        biddableSuits bidSuit;
+        protected biddableSuits bidSuit;
         
         public Bid() : this(true, 0, "") //call the other constructor
         {
@@ -276,10 +288,35 @@ namespace BridgeBid
             return this.bidSuit == biddableSuits.PASS;
         }
 
+        public void Double() 
+        {
+            this.doubled = true;
+        }
+
+        public void ReDouble()
+        {
+            this.redoubled = true;
+        }
+        
+        public bool IsDoubled() 
+        {
+            return this.doubled;
+        }
+
+        public bool IsReDoubled()
+        {
+            return this.redoubled;
+        }
+
         // returns the integer representation of a bid
         public int GetBid()
         {
-            return (this.bidSuit != biddableSuits.PASS ? (this.bidValue * /* # of bids */ 5) + (int) this.bidSuit : 0);
+            return (this.IsBidSuit() ? (this.bidValue * /* # of bids */ 5) + (int) this.bidSuit : 0);
+        }
+
+        protected bool IsBidSuit()
+        {
+            return this.bidSuit != biddableSuits.PASS && this.bidSuit != biddableSuits.DOUBLE && this.bidSuit != biddableSuits.REDOUBLE;
         }
 
         public int TricksNeeded()
@@ -300,6 +337,8 @@ namespace BridgeBid
             switch(this.bidSuit)
             {
                 case biddableSuits.PASS:
+                case biddableSuits.DOUBLE:
+                case biddableSuits.REDOUBLE:
                     theBid += "" + this.bidSuit;
                     break;
                 default:
@@ -311,4 +350,16 @@ namespace BridgeBid
             return theBid;
         }
     }
+
+    public class DoubleBid : Bid //extends
+    {
+        public DoubleBid(bool redouble) : base()
+        {
+            this.bidSuit = (redouble ? biddableSuits.REDOUBLE : biddableSuits.DOUBLE);
+        }
+    }
+
 }
+
+
+
