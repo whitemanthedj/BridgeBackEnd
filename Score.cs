@@ -14,8 +14,6 @@ namespace BridgeScoring
         PartnerScore we;
         PartnerScore they;
 
-
-
         const int book = 6;
 
 
@@ -56,6 +54,10 @@ namespace BridgeScoring
                 // bidders went down tricks
                 opponent.addScore(Math.Abs(netTricks), bidders.Vulnerable());
             }
+            if(bidders.GotGame())
+            {
+                bidders.GetAGame();
+            }
         }
 
         public static bool ContractWasMade(int netTricks)
@@ -63,6 +65,10 @@ namespace BridgeScoring
             return netTricks >= 0;
         }
 
+        public bool RubberOver()
+        {
+            return this.we.GotRubber() || this.they.GotRubber();
+        }
 
     }
     
@@ -103,6 +109,11 @@ namespace BridgeScoring
             return below >= 100;
         }
 
+        public void GetAGame()
+        {
+            this.nummaOfGames++;
+        }
+
         public void UpdateAboveLine()
         {
             this.belowLine.AddRange(this.aboveLine);
@@ -136,6 +147,10 @@ namespace BridgeScoring
 
             bPoints *= (finalBid.IsReDoubled() ? 4 : (finalBid.IsDoubled() ? 2 : 1));
 
+            //for above teh line: OVERTRICKS
+            int vulnerable = (biddersVulnerable ? 2 : 1);
+            aPoints = vulnerable * (finalBid.IsReDoubled() ? 200 : (finalBid.IsDoubled() ? 100 : aPoints));
+
             this.aboveLine.Add(aPoints);
             this.below += bPoints;
             this.belowLine.Add(bPoints);
@@ -160,10 +175,17 @@ namespace BridgeScoring
 
 
 
-        public void addScore(int tricksWentDown, bool isOppenentVulnerable)
+        public void addScore(int underTricks, bool isOppenentVulnerable, Bid finalBid)
         {
-            int points = (isOppenentVulnerable ? 100 : 50) * tricksWentDown ;
-            
+            //for first trick: underTrick is >= 1
+            int points =  (isOppenentVulnerable ? 2 : 1) * (finalBid.IsReDoubled() ? 4 : (finalBid.IsDoubled() ? 2 : 1)) * 50;
+             
+            if(underTricks > 1)
+            {
+                int crazyBids = (isOppenentVulnerable ? 3 : 4); /* different ratios then: 6 for vuln and 4 for not */
+                points += (isOppenentVulnerable ? 2 : 1) * (finalBid.IsReDoubled() ? 2 * crazyBids : (finalBid.IsDoubled() ? crazyBids : 1)) * 50 * (underTricks - 1);
+            }
+
             this.aboveLine.Add( points );
 
             player1.UpdateScore(points);
