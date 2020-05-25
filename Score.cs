@@ -56,7 +56,10 @@ namespace BridgeScoring
             }
             if(bidders.GotGame())
             {
-                bidders.GetAGame();
+                int increase = (bidders.BelowRecord().Count > opponent.BelowRecord().Count ? bidders.BelowRecord().Count: opponent.BelowRecord().Count);
+                // Use that to increase the the count of both scores by ^
+                bidders.GetAGame(increase);
+                opponent.UpdateAboveLine(increase);
             }
         }
 
@@ -70,13 +73,41 @@ namespace BridgeScoring
             return this.we.GotRubber() || this.they.GotRubber();
         }
 
+        
+        public void PrintScoreCard()
+        {
+            int start = (we.AboveRecord().Count > they.AboveRecord().Count ? we.AboveRecord().Count : they.AboveRecord().Count);
+
+            Console.WriteLine("WE   | THEY");
+            Console.WriteLine("     |     ");
+
+            for(int i = start - 1; i >= 0; i--)
+            {
+                string weString = (i < we.AboveRecord().Count ? we.AboveRecord()[i] : "");
+                string theyString = (i < they.AboveRecord().Count ? they.AboveRecord()[i] : "");
+                
+                Console.WriteLine("{0, -5}|{1, -5}", weString, theyString);
+            }
+
+
+            int below = (we.BelowRecord().Count > they.BelowRecord().Count ? we.BelowRecord().Count : they.BelowRecord().Count);
+
+
+            for(int i = 0; i < below; i++)
+            {
+                string weString = (i < we.BelowRecord().Count ? we.BelowRecord()[i] : "    ");
+                string theyString = (i < they.BelowRecord().Count ? they.BelowRecord()[i] : "");
+                
+                Console.WriteLine("{0, -5}|{1, -5}", weString, theyString);
+            }
+        }
     }
     
     public class PartnerScore
     {
         //RECORDS FOR PRINTING
-        List<int> aboveLine;
-        List<int> belowLine;
+        List<string> aboveLine;
+        List<string> belowLine;
 
         //VALUES FOR ADDING
         int below;
@@ -96,8 +127,9 @@ namespace BridgeScoring
             this.player1 = p1;
             this.player2 = p2;
 
-            this.aboveLine = new List<int>();
-            this.belowLine = new List<int>();
+            this.aboveLine = new List<string>();
+            this.belowLine = new List<string>();
+            this.aboveLine.Add("=====");
             this.below = 0;
 
             this.nummaOfGames = 0;
@@ -109,23 +141,41 @@ namespace BridgeScoring
             return below >= 100;
         }
 
-        public void GetAGame()
+        public void GetAGame(int increaseAboveLine)
         {
             this.nummaOfGames++;
+            this.UpdateAboveLine(increaseAboveLine);
         }
+        
 
-        public void UpdateAboveLine()
+        public void UpdateAboveLine(int increaseAboveLine)
         {
+            while(this.belowLine.Count < increaseAboveLine)
+            {
+                this.belowLine.Add("");
+            }
+            
             this.belowLine.AddRange(this.aboveLine);
             this.aboveLine = this.belowLine;
-            this.belowLine = new List<int>();
+            this.belowLine = new List<string>();
+            this.belowLine.Add("-----");
+            this.below = 0;
         }
 
-        public void addScore(int tricksAbove, int tricksBelow, Bid finalBid, bool biddersVulnerable)
+        public void GetARubber(bool opponentVulnerable)
+        {
+            int rubber = (opponentVulnerable ? 500 : 700);
+
+            this.aboveLine.Add(rubber+"");
+            player1.UpdateScore(rubber);
+            player2.UpdateScore(rubber);
+        }
+
+        public void addScore(int overTricks, int tricksBelow, Bid finalBid, bool biddersVulnerable)
         {
             int aPoints = 0, bPoints = 0;
 
-            aPoints += IsSlam(tricksAbove+tricksBelow, biddersVulnerable);
+            aPoints += IsSlam(finalBid.TricksNeeded(), overTricks+tricksBelow, biddersVulnerable);
 
             switch(finalBid.Suit())
             {
@@ -136,11 +186,11 @@ namespace BridgeScoring
                 // Meant to fall through
                 case biddableSuits.H:
                 case biddableSuits.S:
-                    aPoints += 30 * tricksAbove;
+                    aPoints += 30 * overTricks;
                     bPoints += 30 * tricksBelow;
                     break;
                 default:
-                    aPoints += 20 * tricksAbove;
+                    aPoints += 20 * overTricks;
                     bPoints += 20 * tricksBelow;
                     break;
             }
@@ -149,24 +199,27 @@ namespace BridgeScoring
 
             //for above teh line: OVERTRICKS
             int vulnerable = (biddersVulnerable ? 2 : 1);
-            aPoints = vulnerable * (finalBid.IsReDoubled() ? 200 : (finalBid.IsDoubled() ? 100 : aPoints));
+            aPoints = vulnerable * (finalBid.IsReDoubled() ? 200 * overTricks: (finalBid.IsDoubled() ? 100 * overTricks : aPoints));
 
-            this.aboveLine.Add(aPoints);
+            if(aPoints > 0)
+            {
+                this.aboveLine.Add(aPoints+"");
+            }
             this.below += bPoints;
-            this.belowLine.Add(bPoints);
+            this.belowLine.Add(bPoints+"");
 
             player1.UpdateScore(aPoints+bPoints);
             player2.UpdateScore(aPoints+bPoints);
         }
 
-        private int IsSlam(int totalTricks, bool vulnerable)
+        private int IsSlam(int bidVal, int totalTricks, bool vulnerable)
         {
             int SLAM = 6, GRANDSLAM = 7;
-            if(totalTricks >= GRANDSLAM)
+            if(bidVal >= GRANDSLAM && totalTricks >= GRANDSLAM)
             {
                 // GRAND SLAM
                 return (vulnerable ? 1500 : 750);
-            } else if(totalTricks == SLAM) {
+            } else if(bidVal == SLAM && totalTricks == SLAM) {
                 // SLAM
                 return (vulnerable ? 1000 : 500);
             }
@@ -182,11 +235,11 @@ namespace BridgeScoring
              
             if(underTricks > 1)
             {
-                int crazyBids = (isOppenentVulnerable ? 3 : 4); /* different ratios then: 6 for vuln and 4 for not */
+                int crazyBids = (isOppenentVulnerable ? 3 : 4); /* different ratios then: 6 for vuln and 4 for not only for db or redb */
                 points += (isOppenentVulnerable ? 2 : 1) * (finalBid.IsReDoubled() ? 2 * crazyBids : (finalBid.IsDoubled() ? crazyBids : 1)) * 50 * (underTricks - 1);
             }
 
-            this.aboveLine.Add( points );
+            this.aboveLine.Add( points+"" );
 
             player1.UpdateScore(points);
             player2.UpdateScore(points);
@@ -207,6 +260,16 @@ namespace BridgeScoring
         {
             
             return this.player1 == player || this.player2 == player;
+        }
+    
+        public List<string> AboveRecord()
+        {
+            return this.aboveLine;
+        }
+
+        public List<string> BelowRecord()
+        {
+            return this.belowLine;
         }
     }
 }

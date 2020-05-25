@@ -52,24 +52,28 @@ namespace BridgeRound
             if(this.deck.CardCount() == 0)
             {
                 this.deck.Populate();
+                foreach(Player p in this.players)
+                {
+                    p.NewHand();
+                }
             }
 
             this.nummaOfTricks = deck.CardCount() / this.nummaOfPlayers;
-
-            // updates the dealer for the next hand
             
-            this.DealAllCards(this.dealerIndex);
+            this.DealAllCards((this.dealerIndex + 1) % this.nummaOfPlayers);
 
             //this.Auction();
 
             if(this.PlayableContract())
             {
+                // resets all of the tricks
                 this.allTricks = new Trick[this.nummaOfTricks];
 
                 this.PlayTricks();
             }
 
-            //SETUP FOR ANOTHER HAND
+            // SETUP FOR ANOTHER HAND
+            // updates the dealer for the next hand
             this.dealerIndex++;
 
             return this.tricksTakenByBidWinners;
@@ -173,7 +177,7 @@ namespace BridgeRound
 
         private bool PlayableContract()
         {
-            this.auction = new Auction(nummaOfPlayers);
+            this.auction = new Auction(nummaOfPlayers, this.dealerIndex);
             this.AuctionPhase(this.dealerIndex);
             this.auction.PrintRecord();
             this.auction.PrintContract();
@@ -196,9 +200,9 @@ namespace BridgeRound
 
         public void AuctionPhase(int dealerIndex)
         {
-            int playerIndex = dealerIndex;
+            int playerIndex = dealerIndex, everyonesBid = 0;
             // short circuit
-            while(playerIndex < 4 || this.auction.KeepBidding())
+            while(everyonesBid < 4 || this.auction.KeepBidding())
             {
                 int player = playerIndex % this.players.Length;
                 Console.WriteLine("Player "+ (player+1) +":");
@@ -210,6 +214,7 @@ namespace BridgeRound
 
                 }
                 playerIndex++;
+                everyonesBid++;
             }
         }
 
@@ -270,7 +275,6 @@ namespace BridgeRound
             {
                 this.allTricks[i].PrintRecord();
                 Console.WriteLine("At the end of trick " + (i+1) + ": Player " + (this.allTricks[i].TrickWinner()+1) + " took the trick with: " + this.allTricks[i].WinningTrick().ToString());
-                
             }
         }
     }

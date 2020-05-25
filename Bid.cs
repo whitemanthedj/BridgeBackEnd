@@ -20,6 +20,8 @@ namespace BridgeBid
         /// </summary>
         int maxBidPlayerIndex;
 
+        int dealerIndex;
+
         private delegate void doubling();
 
         /// <summary>
@@ -33,7 +35,7 @@ namespace BridgeBid
         /// </summary>
         int consecutivePasses;
 
-        public Auction(int nummaOfPlayers)
+        public Auction(int nummaOfPlayers, int dealerIndex)
         {
             this.allBids = new Bid[nummaOfPlayers];
             for(int i = 0; i < this.allBids.Length; i++)
@@ -43,6 +45,8 @@ namespace BridgeBid
             this.maxBid = new Bid(true,0,"");
             this.record = new List<Bid>();
             //this.fullRecord = new List<string>();
+
+            this.dealerIndex = dealerIndex;
         }
 
         /// <summary>
@@ -76,6 +80,12 @@ namespace BridgeBid
         /// <returns> returns if the bid was a valid bid</returns>
         public bool UpdateBid(int playerIndex, Bid newBid)
         {
+            // if the bid is NOT a pass and if the new bid is not valid return false
+            if(NotValidBid(playerIndex, newBid))
+            {
+                return false;
+            }
+            
             if(newBid.Suit() == biddableSuits.REDOUBLE)
             {
                 this.HandleDouble(this.FinalContract().ReDouble);
@@ -83,11 +93,6 @@ namespace BridgeBid
                 this.HandleDouble(this.FinalContract().Double);
             }
             
-            // if the bid is NOT a pass and if the new bid is not valid return false
-            if(newBid.GetBid() != (int) biddableSuits.PASS && (this.allBids[playerIndex].GreaterThan(newBid) || !newBid.GreaterThan(this.maxBid)))
-            {
-                return false;
-            }
 
             this.consecutivePasses = (newBid.Pass()? this.consecutivePasses + 1 : 0);
             //Console.WriteLine(this.consecutivePasses);
@@ -98,6 +103,28 @@ namespace BridgeBid
             this.record.Add(newBid);
             //this.fullRecord.Add(newBid.ToString());
             return true;
+        }
+
+        public bool NotValidBid(int playerIndex, Bid newBid)
+        {
+            // new bid isn't greater than players previous and current max bid AND it isnt a pass
+            if(newBid.GetBid() != (int) biddableSuits.PASS && (this.allBids[playerIndex].GreaterThan(newBid) || !newBid.GreaterThan(this.maxBid)))
+            {
+                return true;
+            }
+
+            //checking for double criteria
+            if(newBid.Suit() == biddableSuits.DOUBLE && (this.maxBid.Suit() == biddableSuits.PASS || this.maxBid.IsDoubled() || Bidder(playerIndex)))
+            {
+               return true; 
+            }
+
+            if(newBid.Suit() == biddableSuits.REDOUBLE && (this.maxBid.IsReDoubled() || !this.maxBid.IsDoubled() || !Bidder(playerIndex)))
+            {
+               return true; 
+            }
+            
+            return false;
         }
 
         
@@ -120,12 +147,12 @@ namespace BridgeBid
         {
             for(int i = 0; i < this.record.Count; i++)
             {
+                Console.WriteLine(i + ":" + Bidder(i));
                 if(this.record[i].Suit() == this.maxBid.Suit() && this.Bidder(i))
                 {
                     return i % this.allBids.Length;
                 }
             }
-            
             return this.maxBidPlayerIndex;
         }
 
@@ -180,7 +207,7 @@ namespace BridgeBid
         /// </summary>
         public void PrintRecord()
         {
-            int player = 0;
+            int player = this.dealerIndex;
             Console.WriteLine("------");
             
             

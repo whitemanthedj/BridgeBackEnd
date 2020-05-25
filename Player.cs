@@ -39,19 +39,23 @@ namespace BridgePlayer
         {
             //this.hand = new List<Card>();
             this.indexOfPartner = partner;
-            this.highCardPoints = 0;
             this.playerBid = new Bid();
 
+            this.NewHand();
+
+            this.removingCards = false;
+            
+        }
+
+        public void NewHand()
+        {
+            this.highCardPoints = 0;
             this.lastCard = null;
 
             this.clubCards    = new List<Card>();
             this.diamondCards = new List<Card>();
             this.heartCards   = new List<Card>();
             this.spadeCards   = new List<Card>();
-
-
-            this.removingCards = false;
-            
         }
 
         public List<Card> FullHand()

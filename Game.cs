@@ -45,10 +45,19 @@ namespace BridgeGame
             this.scorepad = new ScorePad(this.dealerIndex, this.players);
 
 
-            this.scorepad.UpdateScores(this.currentHand.NewHand(this.players), this.currentHand.FinalContract(), this.players[this.currentHand.FinalContractPlayer()]);
+            while(!this.scorepad.RubberOver())
+            {
+                // ONE HAND
+                this.scorepad.UpdateScores(this.currentHand.NewHand(this.players), this.currentHand.FinalContract(), this.players[this.currentHand.FinalContractPlayer()]);
+                if(this.currentHand.FinalContract().Suit() != biddableSuits.PASS)
+                {
+                    this.currentHand.PrintHand();
+                }
+                this.printAllPlayersScores();
+                this.dealerIndex = (this.dealerIndex + 1) % this.nummaOfPlayers;
+                Console.WriteLine("----NEW HAND----");
 
-            this.printAllPlayersScores();
-
+            }
             /** /
             this.nummaOfTricks = this.deck.CardCount() / this.nummaOfPlayers;
 
@@ -70,12 +79,6 @@ namespace BridgeGame
         }
 
 
-       
-       
-
-      
-        
-
         public void printAllPlayers()
         {
             for(int i = 0; i < nummaOfPlayers; i++)
@@ -87,6 +90,7 @@ namespace BridgeGame
 
         public void printAllPlayersScores()
         {
+            this.scorepad.PrintScoreCard();
             for(int i = 0; i < nummaOfPlayers; i++)
             {
                 Console.WriteLine("Player " + (i+1) + ": " + this.players[i].Score() + " points");
