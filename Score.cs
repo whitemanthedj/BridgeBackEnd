@@ -30,7 +30,7 @@ namespace BridgeScoring
         {
             if(finalContract.Suit() != biddableSuits.PASS)
             {
-                Console.WriteLine("The bidders got " + tricksTaken + " tricks and needed " + finalContract.TricksNeeded());
+                //Console.WriteLine("The bidders got " + tricksTaken + " tricks and needed " + finalContract.TricksNeeded());
                 int netTricks = tricksTaken - finalContract.TricksNeeded();
                 if(this.we.Contains(person))
                 {

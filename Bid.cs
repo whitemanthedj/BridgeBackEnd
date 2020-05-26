@@ -147,10 +147,9 @@ namespace BridgeBid
         {
             for(int i = 0; i < this.record.Count; i++)
             {
-                Console.WriteLine(i + ":" + Bidder(i));
-                if(this.record[i].Suit() == this.maxBid.Suit() && this.Bidder(i))
+                if(this.record[i].Suit() == this.maxBid.Suit() && this.Bidder(i+dealerIndex))
                 {
-                    return i % this.allBids.Length;
+                    return (i + dealerIndex) % this.allBids.Length;
                 }
             }
             return this.maxBidPlayerIndex;

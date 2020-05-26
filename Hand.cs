@@ -268,6 +268,11 @@ namespace BridgeRound
         }
 
 
+        public void PrintNumberOfBiddersTricks()
+        {
+            Console.WriteLine("The bidders got " + this.tricksTakenByBidWinners + " tricks and needed " + this.auction.FinalContract().TricksNeeded());
+        }
+
         public void PrintHand()
         {
             Console.WriteLine("PrintHand");

@@ -21,6 +21,8 @@ namespace BridgeGame
 
         ScorePad scorepad;
 
+        const int book = 6;
+
 
         // CONSIDER A HAND/ROUND CLASS
 
@@ -52,6 +54,7 @@ namespace BridgeGame
                 if(this.currentHand.FinalContract().Suit() != biddableSuits.PASS)
                 {
                     this.currentHand.PrintHand();
+                    this.currentHand.PrintNumberOfBiddersTricks();
                 }
                 this.printAllPlayersScores();
                 this.dealerIndex = (this.dealerIndex + 1) % this.nummaOfPlayers;
