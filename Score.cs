@@ -73,6 +73,19 @@ namespace BridgeScoring
             return this.we.GotRubber() || this.they.GotRubber();
         }
 
+        public void AwardRubberPoints()
+        {
+            if(this.we.GotRubber())
+            {
+                we.GetARubber(they.Vulnerable());
+            }
+            if(this.they.GotRubber())
+            {
+                they.GetARubber(we.Vulnerable());
+            }
+
+        }
+
         
         public void PrintScoreCard()
         {
@@ -154,6 +167,8 @@ namespace BridgeScoring
             {
                 this.belowLine.Add("");
             }
+
+            this.belowLine.Reverse();
             
             this.belowLine.AddRange(this.aboveLine);
             this.aboveLine = this.belowLine;
@@ -199,7 +214,7 @@ namespace BridgeScoring
 
             //for above teh line: OVERTRICKS
             int vulnerable = (biddersVulnerable ? 2 : 1);
-            aPoints = vulnerable * (finalBid.IsReDoubled() ? 200 * overTricks: (finalBid.IsDoubled() ? 100 * overTricks : aPoints));
+            aPoints = (finalBid.IsReDoubled() ? vulnerable * 200 * overTricks: (finalBid.IsDoubled() ? vulnerable * 100 * overTricks : aPoints));
 
             if(aPoints > 0)
             {

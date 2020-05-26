@@ -258,7 +258,7 @@ namespace BridgeBid
             //Console.WriteLine(this.bidValue);
             //this.bidSuit = suit;
 
-            switch(suit)
+            switch(suit.Trim())
             {
                 case "Spades":
                 case "SPADES":

@@ -53,7 +53,7 @@ namespace BridgeGame
                 this.scorepad.UpdateScores(this.currentHand.NewHand(this.players), this.currentHand.FinalContract(), this.players[this.currentHand.FinalContractPlayer()]);
                 if(this.currentHand.FinalContract().Suit() != biddableSuits.PASS)
                 {
-                    this.currentHand.PrintHand();
+                    //this.currentHand.PrintHand();
                     this.currentHand.PrintNumberOfBiddersTricks();
                 }
                 this.printAllPlayersScores();
@@ -77,7 +77,8 @@ namespace BridgeGame
             }
             /**/
 
-
+            this.scorepad.AwardRubberPoints();
+            this.printAllPlayersScores();
             
         }
 
