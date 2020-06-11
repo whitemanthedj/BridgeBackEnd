@@ -90,7 +90,8 @@ namespace BridgeBid
             {
                 this.HandleDouble(this.FinalContract().ReDouble);
             } else if(newBid.Suit() == biddableSuits.DOUBLE) {
-                this.HandleDouble(this.FinalContract().Double);
+                // tryna show more understanding of language: this is just a function pointer
+                this.HandleDouble((/* params when called */) => this.FinalContract().Double());
             }
             
 
@@ -162,9 +163,9 @@ namespace BridgeBid
 
 
 
-        private void HandleDouble(doubling preformDouble)
+        private void HandleDouble(doubling performDouble)
         {
-            preformDouble();
+            performDouble();
             this.consecutivePasses = 0;
             string doubleString = (this.FinalContract().IsReDoubled()  ? "REDOUBLE" : "DOUBLE");
             //this.fullRecord.Add(doubleString);

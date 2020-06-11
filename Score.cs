@@ -190,7 +190,7 @@ namespace BridgeScoring
         {
             int aPoints = 0, bPoints = 0;
 
-            aPoints += IsSlam(finalBid.TricksNeeded(), overTricks+tricksBelow, biddersVulnerable);
+            aPoints += IsSlam(tricksBelow, biddersVulnerable);
 
             switch(finalBid.Suit())
             {
@@ -227,14 +227,14 @@ namespace BridgeScoring
             player2.UpdateScore(aPoints+bPoints);
         }
 
-        private int IsSlam(int bidVal, int totalTricks, bool vulnerable)
+        private int IsSlam(int bidTricks, bool vulnerable)
         {
             int SLAM = 6, GRANDSLAM = 7;
-            if(bidVal >= GRANDSLAM && totalTricks >= GRANDSLAM)
+            if(bidTricks >= GRANDSLAM)
             {
                 // GRAND SLAM
                 return (vulnerable ? 1500 : 750);
-            } else if(bidVal == SLAM && totalTricks == SLAM) {
+            } else if(bidTricks == SLAM) {
                 // SLAM
                 return (vulnerable ? 1000 : 500);
             }
